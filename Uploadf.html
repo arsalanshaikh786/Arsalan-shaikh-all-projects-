@@ -1,218 +1,108 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fresh Food Delivery</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Food Admin Panel</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-      getFirestore, collection, getDocs, addDoc, deleteDoc, doc
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, updateDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";const firebaseConfig = {
+  apiKey: "AIzaSyBcXm5QQaYCCddVXNgGqTBAszdKEK-0PJQ",
+  authDomain: "multi-service-app-77dd8.firebaseapp.com",
+  projectId: "multi-service-app-77dd8",
+  storageBucket: "multi-service-app-77dd8.appspot.com",
+  messagingSenderId: "123732555482",
+  appId: "1:123732555482:web:ea47c825e0dbb504f597e3"
+};
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBcXm5QQaYCCddVXNgGqTBAszdKEK-0PJQ",
-      authDomain: "multi-service-app-77dd8.firebaseapp.com",
-      projectId: "multi-service-app-77dd8",
-      storageBucket: "multi-service-app-77dd8.appspot.com",
-      messagingSenderId: "123732555482",
-      appId: "1:123732555482:web:ea47c825e0dbb504f597e3"
-    };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+const form = document.getElementById("foodForm");
+const foodList = document.getElementById("foodList");
 
-    const productsContainer = document.getElementById("products");
-    const cartContainer = document.getElementById("cart-items");
-    const totalPriceEl = document.getElementById("total-price");
-    const orderForm = document.getElementById("order-form");
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = form.name.value;
+  const price = form.price.value;
+  const image = form.image.value;
 
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  await addDoc(collection(db, "foods"), {
+    name,
+    price,
+    image,
+    createdAt: serverTimestamp()
+  });
 
-    function renderCart() {
-      cartContainer.innerHTML = "";
-      let total = 0;
-      cart.forEach((item, index) => {
-        const price = parseFloat(item.price); // ✅ Ensure price is number
-        total += price;
-        cartContainer.innerHTML += `<li class='mb-2'>${item.name} - ₹${price}
-          <button onclick="removeItem(${index})" class='ml-2 text-red-600'>✖️</button></li>`;
-      });
-      totalPriceEl.textContent = `Total: ₹${total.toFixed(2)}`;
-      localStorage.setItem("cart", JSON.stringify(cart));
-    }
+  form.reset();
+  fetchFoodItems();
+});
 
-    window.removeItem = function(index) {
-      cart.splice(index, 1);
-      renderCart();
-    };
+async function fetchFoodItems() {
+  const querySnapshot = await getDocs(collection(db, "foods"));
+  foodList.innerHTML = "";
 
-    async function loadProducts() {
-      const querySnapshot = await getDocs(collection(db, "foods"));
-      querySnapshot.forEach((docSnap) => {
-        const food = docSnap.data();
-        const card = document.createElement("div");
-        card.className = "bg-white p-4 rounded-lg shadow-md";
-        card.innerHTML = `
-          <img src="${food.image}" alt="${food.name}" class="w-full h-40 object-cover rounded-md mb-3">
-          <h3 class="text-xl font-semibold">${food.name}</h3>
-          <p class="text-green-700 font-bold">₹${food.price}</p>
-          <button class="mt-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-            onclick='addToCart(${JSON.stringify(food)})'>Add to Cart</button>
-        `;
-        productsContainer.appendChild(card);
-      });
-    }
+  querySnapshot.forEach((docSnap) => {
+    const item = docSnap.data();
+    const div = document.createElement("div");
+    div.className = "p-4 bg-white rounded shadow";
 
-    window.addToCart = function(food) {
-      cart.push(food);
-      renderCart();
-    };
+    div.innerHTML = `
+      <img src="${item.image}" alt="${item.name}" class="w-full h-48 object-cover rounded mb-2" />
+      <h3 class="text-xl font-semibold">${item.name}</h3>
+      <p>₹${item.price}</p>
+      <p class="text-sm text-gray-500 mt-1">${item.createdAt?.toDate().toLocaleString() || "No time"}</p>
+      <div class="mt-2 space-x-2">
+        <button onclick="editFoodItem('${docSnap.id}', '${item.name}', '${item.price}', '${item.image}')" class="bg-yellow-500 text-white px-3 py-1 rounded">Edit</button>
+        <button onclick="deleteFoodItem('${docSnap.id}')" class="bg-red-600 text-white px-3 py-1 rounded">Delete</button>
+      </div>
+    `;
 
-    orderForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const name = orderForm.name.value.trim();
-      const email = orderForm.email.value.trim();
-      const mobile = orderForm.mobile.value.trim();
-      const address = orderForm.address.value.trim();
+    foodList.appendChild(div);
+  });
+}
 
-      if (!cart.length) {
-        alert("Your cart is empty!");
-        return;
-      }
+window.editFoodItem = async (id, name, price, image) => {
+  form.name.value = name;
+  form.price.value = price;
+  form.image.value = image;
 
-      try {
-        await addDoc(collection(db, "food_orders"), {
-          name,
-          email,
-          mobile,
-          address,
-          cart,
-          status: "pending",
-          timestamp: Date.now()
-        });
-
-        alert("✅ Order placed successfully!");
-        localStorage.setItem("name", name);
-        localStorage.setItem("email", email);
-        localStorage.setItem("address", address);
-        localStorage.setItem("mobile", mobile);
-        cart = [];
-        renderCart();
-        orderForm.reset();
-        autoFillForm();
-      } catch (error) {
-        console.error("Error placing order:", error);
-        alert("❌ Failed to place order.");
-      }
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    await updateDoc(doc(db, "foods", id), {
+      name: form.name.value,
+      price: form.price.value,
+      image: form.image.value
     });
+    form.reset();
+    fetchFoodItems();
+    form.onsubmit = defaultSubmit;
+  };
+};
 
-    function autoFillForm() {
-      orderForm.name.value = localStorage.getItem("name") || "";
-      orderForm.email.value = localStorage.getItem("email") || "";
-      orderForm.mobile.value = localStorage.getItem("mobile") || "";
-      orderForm.address.value = localStorage.getItem("address") || "";
-    }
+const defaultSubmit = form.onsubmit;
 
-    const trackEmailInput = document.querySelector('#track-form input[name="email"]');
-    if (localStorage.getItem("email")) {
-      trackEmailInput.value = localStorage.getItem("email");
-    }
+window.deleteFoodItem = async (id) => {
+  await deleteDoc(doc(db, "foods", id));
+  fetchFoodItems();
+};
 
-    document.getElementById("track-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = e.target.email.value.trim();
-      const ordersRef = collection(db, "food_orders");
-      const snapshot = await getDocs(ordersRef);
-      const result = document.getElementById("track-result");
-      result.innerHTML = "";
-      let found = false;
+fetchFoodItems();
 
-      snapshot.forEach(async (docSnap) => {
-        const data = docSnap.data();
-        if (data.email === email) {
-          found = true;
-          const orderTime = new Date(data.timestamp);
-          const now = new Date();
-          const timeDiff = (now - orderTime) / 1000 / 60;
-
-          result.innerHTML += `
-            <div class="border p-3 my-2 rounded bg-gray-50">
-              <p><strong>Order by:</strong> ${data.name}</p>
-              <p><strong>Mobile:</strong> ${data.mobile}</p>
-              <p><strong>Address:</strong> ${data.address}</p>
-              <p><strong>Status:</strong> <span class="text-green-700 font-semibold">${data.status}</span></p>
-              <p><strong>Ordered at:</strong> ${orderTime.toLocaleString()}</p>
-              <p><strong>Items:</strong></p>
-              <ul class="list-disc list-inside mb-2">
-                ${data.cart.map(item => `<li>${item.name} - ₹${item.price}</li>`).join("")}
-              </ul>
-              ${timeDiff <= 5 ? `
-                <button onclick="cancelOrder('${docSnap.id}')" class="bg-red-500 text-white px-4 py-2 rounded">Cancel Order</button>
-              ` : `
-                <p class="text-gray-500 italic">Order can no longer be cancelled.</p>
-              `}
-            </div>
-          `;
-        }
-      });
-
-      if (!found) {
-        result.innerHTML = `<p class="text-red-500">No order found with this email.</p>`;
-      }
-    });
-
-    window.cancelOrder = async function(orderId) {
-      if (confirm("Are you sure you want to cancel this order?")) {
-        await deleteDoc(doc(db, "food_orders", orderId));
-        alert("Order cancelled successfully.");
-        document.getElementById("track-form").dispatchEvent(new Event("submit"));
-      }
-    };
-
-    loadProducts();
-    renderCart();
-    autoFillForm();
   </script>
 </head>
-
 <body class="bg-gray-100 text-gray-800">
-  <header class="bg-green-600 text-white text-center py-4 text-3xl font-bold shadow">
-    🍽️ Fresh Food Delivery
-  </header>
+  <header class="bg-green-600 text-white py-4 text-center text-2xl font-bold">🥘 Food Admin Panel</header>  <main class="max-w-3xl mx-auto p-6">
+    <form id="foodForm" class="bg-white p-4 rounded shadow mb-6">
+      <h2 class="text-lg font-semibold mb-3">Upload New Food Item</h2>
+      <input name="name" type="text" placeholder="Food Name" required class="w-full mb-3 px-3 py-2 border rounded" />
+      <input name="price" type="number" placeholder="Price" required class="w-full mb-3 px-3 py-2 border rounded" />
+      <input name="image" type="url" placeholder="Image URL" required class="w-full mb-3 px-3 py-2 border rounded" />
+      <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Add Food</button>
+    </form><div id="foodList" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
 
-  <div class="max-w-7xl mx-auto p-4 grid grid-cols-1 md:grid-cols-3 gap-6">
-    <section class="md:col-span-2">
-      <h2 class="text-2xl font-semibold mb-4">🍲 Food Menu</h2>
-      <div id="products" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-    </section>
-
-    <aside class="bg-white p-4 rounded-xl shadow">
-      <h2 class="text-xl font-semibold mb-2">🛒 Your Cart</h2>
-      <ul id="cart-items" class="mb-2"></ul>
-      <p id="total-price" class="font-bold text-lg mb-4">Total: ₹0</p>
-      <form id="order-form" class="space-y-2">
-        <input type="text" name="name" placeholder="Your Name" required class="w-full p-2 border rounded">
-        <input type="email" name="email" placeholder="Email" required class="w-full p-2 border rounded">
-        <input type="text" name="mobile" placeholder="Mobile Number" required pattern="[0-9]{10}" class="w-full p-2 border rounded">
-        <textarea name="address" placeholder="Address" required class="w-full p-2 border rounded"></textarea>
-        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white w-full py-2 rounded">Place Order</button>
-      </form>
-    </aside>
-  </div>
-
-  <div class="max-w-2xl mx-auto mt-10 bg-white p-6 rounded-xl shadow">
-    <h2 class="text-xl font-semibold mb-3">📧 Track Your Order</h2>
-    <form id="track-form" class="flex gap-2">
-      <input type="email" name="email" placeholder="Enter your email" required class="flex-1 p-2 border rounded">
-      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Track</button>
-    </form>
-    <div id="track-result" class="mt-4"></div>
-  </div>
-
-  <footer class="bg-green-600 text-white text-center py-4 mt-10">
-    &copy; 2025 Fresh Food Delivery. All rights reserved.
+  </main>  <footer class="bg-green-600 text-white text-center py-3 mt-10">
+    &copy; 2025 Food Delivery Admin Panel. All rights reserved.
   </footer>
 </body>
 </html>
