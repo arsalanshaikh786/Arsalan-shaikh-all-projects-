@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin - Manage Vegetables</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-green-50 text-gray-800">
+  <header class="bg-green-600 text-white py-4 shadow-md text-center text-2xl font-bold">
+    🥦 Admin - Vegetable Manager
+  </header>
+
+  <main class="max-w-4xl mx-auto p-6">
+    <form id="vegForm" class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-6 rounded-xl shadow-md mb-8">
+      <input type="hidden" id="vegId">
+      <input type="text" id="name" placeholder="Vegetable Name" class="border p-2 rounded" required />
+      <input type="number" id="price" placeholder="Price (₹)" class="border p-2 rounded" required />
+      <input type="text" id="quantity" placeholder="Quantity (e.g. 1kg)" class="border p-2 rounded" required />
+      <input type="url" id="imageUrl" placeholder="Image URL" class="border p-2 rounded" required />
+      <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 col-span-1 md:col-span-2">
+        ➕ <span id="btnText">Add Vegetable</span>
+      </button>
+    </form>
+
+    <div class="grid gap-4" id="vegList"></div>
+  </main>
+
+  <footer class="bg-green-600 text-white text-center py-3 mt-10">
+    &copy; 2025 Fresh Veggies Admin. All rights reserved.
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs, addDoc,
+      deleteDoc, doc, updateDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBcXm5QQaYCCddVXNgGqTBAszdKEK-0PJQ",
+      authDomain: "multi-service-app-77dd8.firebaseapp.com",
+      projectId: "multi-service-app-77dd8",
+      storageBucket: "multi-service-app-77dd8.appspot.com",
+      messagingSenderId: "123732555482",
+      appId: "1:123732555482:web:ea47c825e0dbb504f597e3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const form = document.getElementById("vegForm");
+    const vegList = document.getElementById("vegList");
+    const vegIdInput = document.getElementById("vegId");
+    const btnText = document.getElementById("btnText");
+
+    async function loadVegetables() {
+      const querySnapshot = await getDocs(collection(db, "vegetables"));
+      vegList.innerHTML = "";
+
+      querySnapshot.forEach((docSnap) => {
+        const veg = docSnap.data();
+        const div = document.createElement("div");
+        div.className = "bg-white p-4 rounded shadow flex gap-4 items-center";
+        div.innerHTML = `
+          <img src="${veg.imageUrl}" alt="${veg.name}" class="w-20 h-20 object-cover rounded" />
+          <div class="flex-1">
+            <h3 class="text-lg font-bold">${veg.name}</h3>
+            <p>₹${veg.price} | ${veg.quantity}</p>
+          </div>
+          <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded" onclick='editVeg("${docSnap.id}", "${veg.name}", ${veg.price}, "${veg.quantity}", "${veg.imageUrl}")'>✏️ Edit</button>
+          <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded" onclick='deleteVeg("${docSnap.id}")'>🗑️ Delete</button>
+        `;
+        vegList.appendChild(div);
+      });
+    }
+
+    window.editVeg = function(id, name, price, quantity, imageUrl) {
+      vegIdInput.value = id;
+      form.name.value = name;
+      form.price.value = price;
+      form.quantity.value = quantity;
+      form.imageUrl.value = imageUrl;
+      btnText.textContent = "Update Vegetable";
+    };
+
+    window.deleteVeg = async function(id) {
+      if (confirm("Are you sure you want to delete this vegetable?")) {
+        await deleteDoc(doc(db, "vegetables", id));
+        loadVegetables();
+      }
+    };
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const id = vegIdInput.value;
+      const name = form.name.value.trim();
+      const price = parseFloat(form.price.value);
+      const quantity = form.quantity.value.trim();
+      const imageUrl = form.imageUrl.value.trim();
+
+      if (!name || !price || !quantity || !imageUrl) {
+        alert("Please fill all fields!");
+        return;
+      }
+
+      const data = { name, price, quantity, imageUrl };
+
+      if (id) {
+        await updateDoc(doc(db, "vegetables", id), data);
+        alert("Vegetable updated!");
+      } else {
+        await addDoc(collection(db, "vegetables"), data);
+        alert("Vegetable added!");
+      }
+
+      form.reset();
+      vegIdInput.value = "";
+      btnText.textContent = "Add Vegetable";
+      loadVegetables();
+    });
+
+    loadVegetables();
+  </script>
+</body>
+</html>
