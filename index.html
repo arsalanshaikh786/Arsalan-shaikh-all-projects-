@@ -3,79 +3,202 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arsalan's Web Hub</title>
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>🌐 Arsalan's Web Hub</title>
 
   <!-- FontAwesome CDN -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Mc4X+htN2XyMjshzXKdx8gZFtInFgL2z/xstOJ6T+F8tAyQ6s8UOmqJTOxGCylJdX68u9KexX+5d1okZmfPqRA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
+  <style>
+    * {
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #e0f2fe, #fef3c7, #f3e8ff);
+      color: #1f2937;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 3rem 1rem;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      text-align: center;
+      color: #1e3a8a;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #6b7280;
+      margin-bottom: 3rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 640px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .card {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.8rem;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+      text-align: center;
+      transition: 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .card i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .card h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .card p {
+      font-size: 1rem;
+      color: #4b5563;
+      margin-bottom: 1rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.6rem 1.2rem;
+      font-weight: 500;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 0.6rem;
+      transition: background 0.3s;
+    }
+
+    .btn-blue { background: #3b82f6; }
+    .btn-blue:hover { background: #2563eb; }
+
+    .btn-purple { background: #8b5cf6; }
+    .btn-purple:hover { background: #7c3aed; }
+
+    .btn-green { background: #10b981; }
+    .btn-green:hover { background: #059669; }
+
+    .btn-red { background: #ef4444; }
+    .btn-red:hover { background: #dc2626; }
+
+    .btn-indigo { background: #6366f1; }
+    .btn-indigo:hover { background: #4f46e5; }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0 1rem;
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+
+    .admin-card {
+      background: #f0fdf4;
+      border: 2px dashed #34d399;
+      padding: 2rem;
+      margin-top: 2rem;
+      border-radius: 1rem;
+      text-align: center;
+    }
+
+    .admin-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: #059669;
+    }
+
+    .admin-card p {
+      color: #4b5563;
+      margin-bottom: 1rem;
+    }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-gray-100 via-blue-100 to-gray-200 min-h-screen text-gray-800 font-sans">
+<body>
 
-  <div class="max-w-6xl mx-auto py-12 px-4">
-    <!-- Header -->
-    <h1 class="text-4xl font-bold text-center mb-2 text-blue-900">🌐 Arsalan's Web Hub</h1>
-    <p class="text-center text-lg text-gray-600 mb-10">All my websites and services in one place</p>
+  <div class="container">
+    <h1>🌐 Arsalan's Web Hub</h1>
+    <p class="subtitle">All my websites and services in one place</p>
 
-    <!-- Cards Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-
-      <!-- Life Loop: Home Services -->
-      <div class="bg-white shadow-lg rounded-2xl p-6 hover:-translate-y-2 transition transform duration-300 hover:shadow-2xl">
-        <div class="text-5xl text-blue-500 mb-4 text-center"><i class="fas fa-hand-holding-heart"></i></div>
-        <h2 class="text-xl font-semibold mb-2 text-center">Life Loop Services</h2>
-        <p class="text-gray-600 mb-4 text-center">Salon, plumbing, electrician, food, grocery and 30+ more services. (Under construction)</p>
-        <div class="text-center">
-          <a href="https://arsalanshaikh786.github.io/Arsalanhttml/home" target="_blank" class="inline-block bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Explore Services</a>
-        </div>
+    <div class="grid">
+      <div class="card">
+        <div style="color:#3b82f6;"><i class="fas fa-hand-holding-heart"></i></div>
+        <h2>Life Loop Services</h2>
+        <p>Salon, plumbing, electrician, food, grocery and 30+ more services. (Under construction)</p>
+        <a href="https://arsalanshaikh786.github.io/Arsalanhttml/home" target="_blank" class="btn btn-blue">Explore Services</a>
       </div>
 
-      <!-- Code Sharing Platform -->
-      <div class="bg-white shadow-lg rounded-2xl p-6 hover:-translate-y-2 transition transform duration-300 hover:shadow-2xl">
-        <div class="text-5xl text-purple-600 mb-4 text-center"><i class="fas fa-code"></i></div>
-        <h2 class="text-xl font-semibold mb-2 text-center">Code Sharing Platform</h2>
-        <p class="text-gray-600 mb-4 text-center">Share and explore HTML, CSS, and other code snippets easily and securely.</p>
-        <div class="text-center">
-          <a href="https://arsalanshaikh786.github.io/World-wide-file-code-shering-/" target="_blank" class="inline-block bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">Visit Platform</a>
-        </div>
+      <div class="card">
+        <div style="color:#8b5cf6;"><i class="fas fa-code"></i></div>
+        <h2>Code Sharing Platform</h2>
+        <p>Share and explore HTML, CSS, and other code snippets easily and securely.</p>
+        <a href="https://arsalanshaikh786.github.io/World-wide-file-code-shering-/" target="_blank" class="btn btn-purple">Visit Platform</a>
       </div>
 
-      <!-- Connectly Chat -->
-      <div class="bg-white shadow-lg rounded-2xl p-6 hover:-translate-y-2 transition transform duration-300 hover:shadow-2xl">
-        <div class="text-5xl text-green-600 mb-4 text-center"><i class="fas fa-comments"></i></div>
-        <h2 class="text-xl font-semibold mb-2 text-center">Connectly Chat</h2>
-        <p class="text-gray-600 mb-4 text-center">A global chatting app developed by Arsalan Shaikh with a modern UI.</p>
-        <div class="text-center">
-          <a href="https://arsalanshaikh786.github.io/Connectly/" target="_blank" class="inline-block bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">Download App</a>
-        </div>
+      <div class="card">
+        <div style="color:#10b981;"><i class="fas fa-comments"></i></div>
+        <h2>Connectly Chat</h2>
+        <p>A global chatting app developed by Arsalan Shaikh with a modern UI.</p>
+        <a href="https://arsalanshaikh786.github.io/Connectly/" target="_blank" class="btn btn-green">Download App</a>
       </div>
 
-      <!-- Game Hub -->
-      <div class="bg-white shadow-xl rounded-2xl p-6 hover:-translate-y-2 transition transform duration-300 hover:shadow-2xl">
-        <div class="text-5xl text-red-500 mb-4 text-center"><i class="fas fa-gamepad"></i></div>
-        <h2 class="text-2xl font-semibold mb-2 text-center">Math Arcade Game</h2>
-        <p class="text-gray-600 mb-4 text-center">A fun arcade-style math game to jump, solve, and win high scores.</p>
-        <div class="text-center">
-          <a href="https://arsalanshaikh786.github.io/Arsalan-game-hub/" target="_blank" class="inline-block bg-red-500 text-white px-5 py-2 rounded-full hover:bg-red-600 transition">Play Now</a>
-        </div>
+      <div class="card">
+        <div style="color:#ef4444;"><i class="fas fa-gamepad"></i></div>
+        <h2>Math Arcade Game</h2>
+        <p>A fun arcade-style math game to jump, solve, and win high scores.</p>
+        <a href="https://arsalanshaikh786.github.io/Arsalan-game-hub/" target="_blank" class="btn btn-red">Play Now</a>
       </div>
 
-      <!-- Free Internet Service -->
-      <div class="bg-white shadow-lg rounded-2xl p-6 hover:-translate-y-2 transition transform duration-300 hover:shadow-2xl">
-        <div class="text-5xl text-indigo-600 mb-4 text-center"><i class="fas fa-wifi"></i></div>
-        <h2 class="text-xl font-semibold mb-2 text-center">Free Internet Service</h2>
-        <p class="text-gray-600 mb-4 text-center">Get access to free internet using VPN, SNI, and tunneling techniques. Managed by Arsalan.</p>
-        <div class="text-center">
-          <a href="https://arsalanshaikh786.github.io/Arsalan-shaikh/" target="_blank" class="inline-block bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">Get Started</a>
-        </div>
+      <div class="card">
+        <div style="color:#6366f1;"><i class="fas fa-wifi"></i></div>
+        <h2>Free Internet Service</h2>
+        <p>Access free internet using VPN, SNI, and tunneling techniques. Managed by Arsalan.</p>
+        <a href="https://arsalanshaikh786.github.io/Arsalan-shaikh/" target="_blank" class="btn btn-indigo">Get Started</a>
       </div>
-
     </div>
 
-    <!-- Footer -->
-    <footer class="text-center mt-12 text-sm text-gray-500">
+    <!-- Admin Dashboard -->
+    <div class="admin-card">
+      <div style="font-size: 2rem;"><i class="fas fa-leaf" style="color:#059669;"></i></div>
+      <h2>Vegetable & Food Admin Dashboard</h2>
+      <p>Manage vegetable & food products, view orders, and update inventory efficiently.</p>
+      <a href="https://your-vegetable-admin-url.com" target="_blank" class="btn btn-green">Open Dashboard</a>
+    </div>
+
+    <footer>
       &copy; 2025 Arsalan Shaikh. All rights reserved.
     </footer>
   </div>
