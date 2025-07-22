@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel | Book PDFs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #f1f1f1;
+      padding: 20px;
+    }
+
+    header {
+      background: #1976d2;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    form, .book-list {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    input, textarea, button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #135ca5;
+    }
+
+    .book-item {
+      border-bottom: 1px solid #eee;
+      padding: 10px 0;
+    }
+
+    .book-item:last-child {
+      border-bottom: none;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 5px;
+    }
+
+    .actions button {
+      flex: 1;
+    }
+
+    @media screen and (max-width: 600px) {
+      header h1 {
+        font-size: 1.4rem;
+      }
+
+      input, textarea, button {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📚 Admin Panel</h1>
+    <p>Manage your PDF study material</p>
+  </header>
+
+  <form id="bookForm">
+    <input type="text" id="name" placeholder="Book Name" required />
+    <input type="url" id="logo" placeholder="Logo Image URL" required />
+    <textarea id="description" placeholder="Book Description" required></textarea>
+    <input type="url" id="pdf" placeholder="PDF Link" required />
+    <input type="hidden" id="bookId" />
+    <button type="submit">Save Book</button>
+    <div id="message"></div>
+  </form>
+
+  <div class="book-list" id="bookList">
+    <h3>📖 Uploaded Books</h3>
+    <div id="booksContainer"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc, getDocs,
+      deleteDoc, doc, updateDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBcXm5QQaYCCddVXNgGqTBAszdKEK-0PJQ",
+      authDomain: "multi-service-app-77dd8.firebaseapp.com",
+      projectId: "multi-service-app-77dd8",
+      storageBucket: "multi-service-app-77dd8.firebasestorage.app",
+      messagingSenderId: "123732555482",
+      appId: "1:123732555482:web:ea47c825e0dbb504f597e3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const bookForm = document.getElementById("bookForm");
+    const message = document.getElementById("message");
+    const booksContainer = document.getElementById("booksContainer");
+
+    async function loadBooks() {
+      booksContainer.innerHTML = '';
+      const querySnapshot = await getDocs(collection(db, "books"));
+      querySnapshot.forEach((docSnap) => {
+        const book = docSnap.data();
+        const div = document.createElement("div");
+        div.className = "book-item";
+        div.innerHTML = `
+          <strong>${book.name}</strong><br>
+          📄 <a href="${book.pdf}" target="_blank">PDF Link</a><br>
+          🧾 ${book.description}<br>
+          📥 Downloads: ${book.downloads || 0}
+          <div class="actions">
+            <button onclick="editBook('${docSnap.id}', '${book.name}', '${book.logo}', \`${book.description.replace(/`/g, "\\`")}\`, '${book.pdf}')">✏️ Edit</button>
+            <button onclick="deleteBook('${docSnap.id}')">🗑️ Delete</button>
+          </div>
+        `;
+        booksContainer.appendChild(div);
+      });
+    }
+
+    window.editBook = (id, name, logo, description, pdf) => {
+      document.getElementById('bookId').value = id;
+      document.getElementById('name').value = name;
+      document.getElementById('logo').value = logo;
+      document.getElementById('description').value = description;
+      document.getElementById('pdf').value = pdf;
+      bookForm.scrollIntoView({ behavior: "smooth" });
+    };
+
+    window.deleteBook = async (id) => {
+      if (confirm("Are you sure you want to delete this book?")) {
+        await deleteDoc(doc(db, "books", id));
+        loadBooks();
+      }
+    };
+
+    bookForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('bookId').value;
+      const name = document.getElementById('name').value;
+      const logo = document.getElementById('logo').value;
+      const description = document.getElementById('description').value;
+      const pdf = document.getElementById('pdf').value;
+
+      if (id) {
+        const bookRef = doc(db, "books", id);
+        await updateDoc(bookRef, { name, logo, description, pdf });
+        message.innerText = "✅ Book updated!";
+      } else {
+        await addDoc(collection(db, "books"), {
+          name, logo, description, pdf, downloads: 0
+        });
+        message.innerText = "✅ Book added!";
+      }
+
+      bookForm.reset();
+      document.getElementById('bookId').value = '';
+      loadBooks();
+    });
+
+    loadBooks();
+  </script>
+</body>
+</html>
